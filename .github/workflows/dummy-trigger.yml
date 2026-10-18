@@ -1,0 +1,4 @@
+name: trigger
+on: push
+jobs:
+  nothing: { runs-on: ubuntu-latest, steps: [ { run: "true" } ] }
