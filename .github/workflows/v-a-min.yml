@@ -1,0 +1,8 @@
+name: v-a-min
+on:
+  workflow_call:
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - run: "true"

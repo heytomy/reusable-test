@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Performs a vulnerability scan with OSV-Scanner and reports the result.
-name: drop-codeql
+name: OSV-Scanner single vulnerability scan
 
 
 
@@ -60,7 +60,7 @@ on:
         description: "Whether to export the scan results as job outputs (can fail for large repositories due to size limits)"
         type: boolean
         default: false
-      runs-on:
+    runs-on: ubuntu-latest
         description: "The runner to use for the scan job (E.g. 'ubuntu-latest', 'ubuntu-24.04', or a self-hosted runner label)"
         type: string
         default: "ubuntu-latest"
@@ -152,6 +152,11 @@ jobs:
           path: ${{ inputs.matrix-property }}${{ inputs.results-file-name }}
           retention-days: 5
       # Upload the results to GitHub's code scanning dashboard.
+      - name: "Upload to code-scanning"
+        if: "${{ !cancelled() && inputs.upload-sarif == true }}"
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        with:
+          sarif_file: ${{ inputs.matrix-property }}${{ inputs.results-file-name }}
       - name: "Print Code Scanning URL"
         if: "${{ !cancelled() && inputs.upload-sarif == true }}"
         run: |

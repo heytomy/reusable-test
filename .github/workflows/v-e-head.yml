@@ -1,0 +1,76 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Performs a vulnerability scan with OSV-Scanner and reports the result.
+name: OSV-Scanner single vulnerability scan
+
+
+
+on:
+  workflow_call:
+    inputs:
+      scan-args:
+        description: "Custom osv-scanner arguments (See https://google.github.io/osv-scanner/usage/ for options, you cannot set --format or --output)"
+        type: string
+        default: |-
+          -r
+          ./
+      results-file-name:
+        description: "File name of the result SARIF file"
+        type: string
+        default: results.sarif
+      download-artifact:
+        description: "Optional artifact to download for scanning"
+        required: false
+        default: ""
+        type: string
+      upload-sarif:
+        description: "Whether to upload to Security > Code Scanning"
+        type: boolean
+        required: false
+        default: true
+      fail-on-vuln:
+        description: "Whether to fail the action on vulnerability found"
+        type: boolean
+        default: true
+      matrix-property:
+        description: "Optional string for matrix strategies (E.g. 'amd64-')"
+        type: string
+        default: ""
+      checkout-submodules:
+        description: "Whether to check out submodules or not. Passed on to `submodules` argument of `actions/checkout`"
+        type: boolean
+        default: false
+      ref:
+        description: "Whether to checkout a custom branch/tag/commit for scanning other than the default branch"
+        type: string
+        default: ""
+      export-results:
+        description: "Whether to export the scan results as job outputs (can fail for large repositories due to size limits)"
+        type: boolean
+        default: false
+      runs-on:
+        description: "The runner to use for the scan job (E.g. 'ubuntu-latest', 'ubuntu-24.04', or a self-hosted runner label)"
+        type: string
+        default: "ubuntu-latest"
+    outputs:
+      results:
+        description: "Results of the scan in JSON format"
+        value: ${{ jobs.osv-scan.outputs.results }}
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - run: "true"

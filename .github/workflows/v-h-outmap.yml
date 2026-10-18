@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Performs a vulnerability scan with OSV-Scanner and reports the result.
-name: drop-check
+name: OSV-Scanner single vulnerability scan
 
 
 
@@ -64,11 +64,6 @@ on:
         description: "The runner to use for the scan job (E.g. 'ubuntu-latest', 'ubuntu-24.04', or a self-hosted runner label)"
         type: string
         default: "ubuntu-latest"
-    outputs:
-      results:
-        description: "Results of the scan in JSON format"
-        value: ${{ jobs.osv-scan.outputs.results }}
-
 jobs:
   osv-scan:
     runs-on: ${{ inputs.runs-on }}
@@ -108,6 +103,15 @@ jobs:
       # fails writes no results file, and the reporter treats a missing --new file as
       # "no vulnerabilities found" and exits 0, which would turn a failed scan into a
       # passing check. Report only on a scan that produced results.
+      - name: "Check that the scan completed"
+        if: ${{ steps.scan.outcome == 'failure' }}
+        env:
+          RESULTS: ${{ inputs.matrix-property }}results.json
+        run: |
+          if [ ! -s "${RESULTS}" ]; then
+            echo "::error::OSV-Scanner failed without writing ${RESULTS}, so there are no results to report on. Failing the job rather than reporting no vulnerabilities found. See the \"Run scanner\" step for the cause."
+            exit 1
+          fi
       - name: "Run osv-scanner-reporter"
         uses: google/osv-scanner-action/osv-reporter-action@0a65f82af05cd58cf587827b0bb0489548c18346 # v2.7.0
         with:
